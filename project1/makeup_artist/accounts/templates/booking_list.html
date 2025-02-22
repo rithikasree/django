@@ -1,0 +1,209 @@
+{% if request.COOKIES.auth_token %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Bookings</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f6d365, #fda085);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+        }
+        .logout-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            color: #e60073;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .logout-button:hover {
+            background: #ffd9e0;
+        }
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .search-bar {
+            width: 80%;
+            max-width: 500px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+        .search-bar:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        tr:hover {
+            background: rgba(0, 123, 255, 0.1);
+        }
+        .btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin: 2px;
+        }
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-update {
+            background: #28a745;
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+        .no-bookings {
+            text-align: center;
+            color: #555;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 20px;
+        }
+    </style>
+    <script>
+        // Function to get a specific cookie value
+        function getCookie(name) {
+            let cookies = document.cookie.split("; ");
+            for (let cookie of cookies) {
+                let [key, value] = cookie.split("=");
+                if (key === name) {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+        // Redirect to login if auth_token is missing
+        if (!getCookie("auth_token")) {
+            window.location.href = "{% url 'login' %}";
+        }
+
+        function searchBookings() {
+            let input = document.getElementById("searchInput").value.toLowerCase();
+            let rows = document.querySelectorAll("tbody tr");
+
+            rows.forEach(row => {
+                let rowText = row.innerText.toLowerCase();
+                row.style.display = rowText.includes(input) ? "" : "none";
+            });
+        }
+
+        function logout() {
+            document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            window.location.href = "{% url 'logout' %}";
+            setTimeout(function() {
+        window.location.reload();  // Manually refresh the page
+    }, 500);
+        }
+       
+      
+    </script>
+</head>
+<body>
+    <button class="logout-button" onclick="logout()">Logout</button>
+    <div class="container">
+        <h2>📋 All Customer Bookings</h2>
+        
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-bar" onkeyup="searchBookings()" placeholder="🔍 Search by name, phone, or service...">
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Phone</th>
+                    <th>Date</th>
+                    <th>Service</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>{{ booking.name }}</td>
+                    <td>{{ booking.address }}</td>
+                    <td>{{ booking.phone }}</td>
+                    <td>{{ booking.date }}</td>
+                    <td>{{ booking.service }}</td>
+                    <td>₹{{ booking.price }}</td>
+                    <td>
+                        <form action="{% url 'delete_booking' booking.id %}" method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <button class="btn btn-delete" type="submit">❌ Delete</button>
+                        </form>
+                        <a href="{% url 'update_booking' booking.id %}" class="btn btn-update">✏️ Update</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="no-bookings">🚫 No bookings found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+{% endif %}

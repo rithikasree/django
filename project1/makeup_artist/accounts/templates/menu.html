@@ -1,0 +1,147 @@
+{% if request.COOKIES.auth_token %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Makeup Services</title>
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(120deg, #ff9a9e, #fad0c4);
+        margin: 0;
+        padding: 0;
+      }
+      .navbar {
+        background: #e60073;
+        padding: 15px;
+        text-align: center;
+        position: relative;
+      }
+      .navbar a {
+        color: white;
+        text-decoration: none;
+        padding: 15px;
+        font-size: 18px;
+        font-weight: bold;
+        display: inline-block;
+      }
+      .navbar a:hover {
+        background: #b3005c;
+        border-radius: 5px;
+      }
+      .logout-button {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        background: white;
+        color: #e60073;
+        border: none;
+        padding: 10px 15px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      .logout-button:hover {
+        background: #ffd9e0;
+      }
+      .menu-container {
+        text-align: center;
+        padding: 30px;
+      }
+      .menu-item {
+        padding: 15px;
+        border-bottom: 1px solid #ddd;
+        font-size: 20px;
+        color: #333;
+        cursor: pointer;
+      }
+      .menu-item:last-child {
+        border-bottom: none;
+      }
+      .menu-item:hover {
+        background: #ffd9e0;
+        border-radius: 5px;
+      }
+      .menu-item span {
+        font-weight: bold;
+        color: #e60073;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      // Function to get a specific cookie value
+      function getCookie(name) {
+        let cookies = document.cookie.split("; ");
+        for (let cookie of cookies) {
+          let [key, value] = cookie.split("=");
+          if (key === name) {
+            return value;
+          }
+        }
+        return null;
+      }
+
+      // Redirect to login if auth_token is missing
+      if (!getCookie("auth_token")) {
+        window.location.href = "{% url 'login' %}";
+      }
+    </script>
+
+    <div class="navbar">
+      <a href="#">Home</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+      <button class="logout-button" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="menu-container">
+      <h1>Our Makeup Services</h1>
+      <div class="menu-item" onclick="bookService('Wedding Makeup', 15000)">
+        <span>Wedding Makeup</span>
+      </div>
+      <div class="menu-item" onclick="bookService('Reception Makeup', 12000)">
+        <span>Reception Makeup</span>
+      </div>
+      <div class="menu-item" onclick="bookService('Puberty Ceremony', 10000)">
+        <span>Puberty Ceremony</span>
+      </div>
+      <div class="menu-item" onclick="bookService('Bridesmaid Makeup', 8000)">
+        <span>Bridesmaid Makeup</span>
+      </div>
+      <div class="menu-item" onclick="bookService('Baby Shower Makeup', 9000)">
+        <span>Baby Shower Makeup</span>
+      </div>
+      <div class="menu-item" onclick="bookService('Simple Makeup', 5000)">
+        <span>Simple Makeup</span>
+      </div>
+    </div>
+    <script>
+      function bookService(serviceName, price) {
+        let bookingUrl = "{% url 'booking' %}"; // This is rendered by Django
+        let fullUrl =
+          bookingUrl +
+          "?service=" +
+          encodeURIComponent(serviceName) +
+          "&price=" +
+          price;
+        console.log("Redirecting to:", fullUrl); // Debugging output
+        window.location.href = fullUrl;
+      }
+
+      function logout() {
+        document.cookie =
+          "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.href = "{% url 'logout' %}";
+        setTimeout(function() {
+        window.location.reload();  // Manually refresh the page
+    }, 500);
+      }
+      
+    </script>
+  </body>
+</html>
+
+{% endif %}

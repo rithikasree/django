@@ -1,0 +1,124 @@
+{% if request.COOKIES.auth_token %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Your Makeup Service</title>
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(120deg, #ff9a9e, #fad0c4);
+        text-align: center;
+        padding: 50px;
+      }
+      .form-container {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        display: inline-block;
+        width: 300px;
+      }
+      input, button {
+        width: 90%;
+        margin: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+      button {
+        background: #e60073;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #b3005c;
+      }
+      .success-message {
+        background: #d4edda;
+        color: #155724;
+        padding: 10px;
+        margin-top: 20px;
+        border-radius: 5px;
+        display: inline-block;
+      }
+      .logout-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: #ff4d4d;
+        padding: 10px 15px;
+        color: white;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        width: 20%;
+      }
+      .logout-btn:hover {
+        background: #cc0000;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      function getCookie(name) {
+        let cookies = document.cookie.split("; ");
+        for (let cookie of cookies) {
+          let [key, value] = cookie.split("=");
+          if (key === name) {
+            return value;
+          }
+        }
+        return null;
+      }
+      if (!getCookie("auth_token")) {
+        window.location.href = "{% url 'login' %}";
+      }
+      
+      
+    </script>
+
+    {% if success == "true" %}
+      <!-- Logout button (Visible after booking) -->
+      <button onclick="logout()" class="logout-btn">Logout</button>
+      <!-- {% if request.COOKIES.auth_token %} -->
+      <div class="success-message">
+        <h2>Booking Successful!</h2>
+        <p><strong>Service:</strong> {{ request.GET.service }}</p>
+        <p><strong>Amount:</strong> ₹{{ request.GET.price }}</p>
+        <p><strong>Name:</strong> {{ request.GET.name }}</p>
+        <p><strong>Address:</strong> {{ request.GET.address }}</p>
+        <p><strong>Phone:</strong> {{ request.GET.phone }}</p>
+        <p><strong>Booking Date:</strong> {{ request.GET.date }}</p>
+      </div>
+      <!-- {% endif %} -->
+    {% else %}
+      <div class="form-container">
+        <form method="POST">
+          {% csrf_token %}
+          <p>Service: "{{ service }}"</p>
+          <p>Amount: ₹"{{ price }}"</p>
+          <input type="hidden" name="service" value="{{ service }}">
+          <input type="hidden" name="price" value="{{ price }}">
+          <input type="text" name="name" placeholder="Your Name" required />
+          <input type="text" name="address" placeholder="Your Address" required />
+          <input type="tel" name="phone" placeholder="Your Phone Number" required />
+          <input type="date" name="date" required />
+          <button type="submit">Confirm Booking</button>
+        </form>
+      </div>
+    {% endif %}
+    <script>function logout() {
+      document.cookie =
+        "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      window.location.href = "{% url 'logout' %}";
+      setTimeout(function() {
+      window.location.reload();  // Manually refresh the page
+  }, 500);
+    }</script>
+  </body>
+</html>
+{% endif %}
